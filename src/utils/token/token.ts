@@ -3,9 +3,11 @@ import { HUserDocument, UserModel } from "../../DB/model/user.model";
 import { RoleEnum } from "../../DB/model/user.model";
 import { UnauthorizedException } from "../errors/error.response";
 import { userRepository } from "../../DB/repositories/user.repositiories";
-import {v4 as uuid} from 'uuid'
 import { TokenRepository } from "../../DB/repositories/token.repository";
 import { TokenModel } from "../../DB/model/token.model";
+import pkg from "uuid";
+const { v4: uuid } = pkg;
+
 export enum TokenEnum{
 Access = "Access",
 Refresh = "Refresh"

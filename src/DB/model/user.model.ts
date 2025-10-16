@@ -40,6 +40,9 @@ parentId:{type:mongoose.Schema.Types.ObjectId,ref:"User",required:false}
 
 )
 
+//give me user object to use for postman
+//{ "name": "John Doe", "username": "johndoe", "email": "johndoe@example.com", "password": "password123", "birthdate": "2000-01-01", "role": "User" }
+
 
 
 export const UserModel = models.User || mongoose.model<IUser>("User",userSchema)

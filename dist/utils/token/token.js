@@ -1,7 +1,4 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.revokeToken = exports.decodedtoken = exports.createLoginCredentials = exports.getSignature = exports.getSignaturesLevel = exports.verifyToken = exports.generateToken = exports.LogoutEnum = exports.SignatureLevelEnum = exports.TokenEnum = void 0;
 const jsonwebtoken_1 = require("jsonwebtoken");
@@ -11,8 +8,7 @@ const error_response_1 = require("../errors/error.response");
 const user_repositiories_1 = require("../../DB/repositories/user.repositiories");
 const token_repository_1 = require("../../DB/repositories/token.repository");
 const token_model_1 = require("../../DB/model/token.model");
-const uuid_1 = __importDefault(require("uuid"));
-const { v4: uuid } = uuid_1.default;
+const crypto_1 = require("crypto");
 var TokenEnum;
 (function (TokenEnum) {
     TokenEnum["Access"] = "Access";
@@ -79,7 +75,7 @@ exports.getSignature = getSignature;
 const createLoginCredentials = async (user) => {
     const SignatureLevel = await (0, exports.getSignaturesLevel)(user.role);
     const Signature = await (0, exports.getSignature)(SignatureLevel);
-    const jwtid = uuid();
+    const jwtid = (0, crypto_1.randomUUID)();
     const accestoken = await (0, exports.generateToken)({
         payload: { _id: user._id },
         secret: Signature.accessSignature,

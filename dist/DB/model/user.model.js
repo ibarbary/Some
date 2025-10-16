@@ -53,5 +53,7 @@ exports.userSchema = new mongoose_1.default.Schema({
     role: { type: String, enum: Object.values(RoleEnum), default: RoleEnum.User },
     parentId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "User", required: false }
 }, { timestamps: true });
+//give me user object to use for postman
+//{ "name": "John Doe", "username": "johndoe", "email": "johndoe@example.com", "password": "password123", "birthdate": "2000-01-01", "role": "User" }
 exports.UserModel = mongoose_1.models.User || mongoose_1.default.model("User", exports.userSchema);
 //# sourceMappingURL=user.model.js.map

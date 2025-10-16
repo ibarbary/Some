@@ -13,7 +13,10 @@ import {
   NotFoundException,
 } from "../../utils/errors/error.response";
 import { compareText, hashtext } from "../../utils/security/hash";
-import { emailEvent } from "../../utils/email/email.event";
+import {
+  sendConfirmEmail,
+  sendForgotPasswordEmail,
+} from "../../utils/email/email.event";
 import { generateOtp } from "../../utils/generateotp/generateotp";
 import { UserModel } from "../../DB/model/user.model";
 import { createLoginCredentials } from "../../utils/token/token";
@@ -58,7 +61,8 @@ class AuthenticationService {
     if (!user) {
       throw new BadRequestException("user not created");
     }
-    emailEvent.emit("confirmEmail", { to: email, username, otp });
+
+    await sendConfirmEmail({ to: email, username, otp });
 
     return res.status(201).json({ message: "user created suuccess", user });
   };
@@ -132,7 +136,7 @@ class AuthenticationService {
       update: { forgetPasswordOtp: await hashtext(String(otp)) },
     });
 
-    emailEvent.emit("forgotPassword", {
+    await sendForgotPasswordEmail({
       to: email,
       username: user.username,
       otp,
@@ -159,15 +163,13 @@ class AuthenticationService {
       );
     }
 
-
-
     await this._UserModel.updateOne({
       filter: { email },
-      update: { password: await hashtext(password) ,$unset:{forgetPasswordOtp:1}}, });
-   
-
-
-
+      update: {
+        password: await hashtext(password),
+        $unset: { forgetPasswordOtp: 1 },
+      },
+    });
 
     return res.status(200).json({ message: "password reset Success" });
   };

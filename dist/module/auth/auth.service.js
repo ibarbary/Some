@@ -38,7 +38,7 @@ class AuthenticationService {
         if (!user) {
             throw new error_response_1.BadRequestException("user not created");
         }
-        email_event_1.emailEvent.emit("confirmEmail", { to: email, username, otp });
+        await (0, email_event_1.sendConfirmEmail)({ to: email, username, otp });
         return res.status(201).json({ message: "user created suuccess", user });
     };
     confirmEmail = async (req, res) => {
@@ -95,7 +95,7 @@ class AuthenticationService {
             filter: { email },
             update: { forgetPasswordOtp: await (0, hash_1.hashtext)(String(otp)) },
         });
-        email_event_1.emailEvent.emit("forgotPassword", {
+        await (0, email_event_1.sendForgotPasswordEmail)({
             to: email,
             username: user.username,
             otp,
@@ -116,7 +116,10 @@ class AuthenticationService {
         }
         await this._UserModel.updateOne({
             filter: { email },
-            update: { password: await (0, hash_1.hashtext)(password), $unset: { forgetPasswordOtp: 1 } },
+            update: {
+                password: await (0, hash_1.hashtext)(password),
+                $unset: { forgetPasswordOtp: 1 },
+            },
         });
         return res.status(200).json({ message: "password reset Success" });
     };

@@ -15,6 +15,7 @@ const user_controller_1 = __importDefault(require("./module/user/user.controller
 const error_response_1 = require("./utils/errors/error.response");
 const connection_1 = require("./DB/connection");
 const app = (0, express_1.default)();
+app.set('trust proxy', 1);
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
     max: 100,

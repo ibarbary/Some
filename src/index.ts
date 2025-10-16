@@ -13,6 +13,8 @@ import { connectDB } from "./DB/connection";
 
 const app: Express = express();
 
+app.set('trust proxy', true);
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,

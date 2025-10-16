@@ -31,7 +31,7 @@ exports.UnauthorizedException = UnauthorizedException;
 const globalErrorHandler = (err, req, res, next) => {
     return res.status(err.statusCode || 500).json({
         message: err.message || "something went wrong",
-        stack: process.env.NODE_ENV === "DEV" ? err.stack : undefined,
+        stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
         cause: err.cause,
     });
 };

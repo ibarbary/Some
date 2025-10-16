@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = require("dotenv");
 const path_1 = __importDefault(require("path"));
-(0, dotenv_1.config)({ path: path_1.default.join(__dirname, "../config/.env.dev") });
+(0, dotenv_1.config)({ path: path_1.default.resolve(__dirname, "../.env") });
 const express_1 = __importDefault(require("express"));
 const helmet_1 = __importDefault(require("helmet"));
 const cors_1 = __importDefault(require("cors"));
@@ -25,7 +25,7 @@ app.use((0, cors_1.default)(), express_1.default.json(), (0, helmet_1.default)()
 app.use("/api/auth", auth_controller_1.default);
 app.use("/api/user", user_controller_1.default);
 app.use(error_response_1.globalErrorHandler);
-app.get("/", (req, res) => res.json({ status: "ok" }));
+app.get("/", (req, res) => res.json({ message: "Hello MotherFucker" }));
 if (process.env.NODE_ENV !== "production") {
     const port = process.env.PORT || 5000;
     app.listen(port, () => console.log(`Server running on port ${port}`));

@@ -5,8 +5,7 @@ import { UnauthorizedException } from "../errors/error.response";
 import { userRepository } from "../../DB/repositories/user.repositiories";
 import { TokenRepository } from "../../DB/repositories/token.repository";
 import { TokenModel } from "../../DB/model/token.model";
-import pkg from "uuid";
-const { v4: uuid } = pkg;
+import { randomUUID } from "crypto";
 
 export enum TokenEnum{
 Access = "Access",
@@ -109,7 +108,7 @@ return Signature ;
 export const createLoginCredentials = async(user:HUserDocument)=>{
 const SignatureLevel = await getSignaturesLevel(user.role); 
 const Signature = await getSignature(SignatureLevel);
-const jwtid = uuid();
+const jwtid = randomUUID();
 const accestoken = await generateToken({
     payload:{_id:user._id},
     secret:Signature.accessSignature,

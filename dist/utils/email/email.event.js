@@ -12,7 +12,7 @@ const sendConfirmEmail = async (data) => {
     }
     catch (error) {
         console.error("❌ Failed to send confirmation email", error);
-        throw error; // Re-throw so the caller knows it failed
+        throw error;
     }
 };
 exports.sendConfirmEmail = sendConfirmEmail;

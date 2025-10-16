@@ -64,7 +64,9 @@ class AuthenticationService {
 
     await sendConfirmEmail({ to: email, username, otp });
 
-    return res.status(201).json({ message: "user created suuccess", user });
+    return res.status(201).json({
+      message: "Signup successful. A confirmation email has been sent.",
+    });
   };
 
   confirmEmail = async (req: Request, res: Response): Promise<Response> => {
@@ -97,9 +99,10 @@ class AuthenticationService {
 
     const Credentials = await createLoginCredentials(user);
 
-    return res
-      .status(200)
-      .json({ message: "user loged in success", Credentials });
+    return res.status(200).json({
+      message: "user logged in success",
+      Credentials,
+    });
   };
 
   login = async (req: Request, res: Response): Promise<Response> => {
@@ -118,7 +121,7 @@ class AuthenticationService {
 
     return res
       .status(200)
-      .json({ message: "user loged in success", Credentials });
+      .json({ message: "user logged in success", Credentials });
   };
 
   forgetPassword = async (req: Request, res: Response): Promise<Response> => {

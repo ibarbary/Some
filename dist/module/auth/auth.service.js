@@ -39,7 +39,9 @@ class AuthenticationService {
             throw new error_response_1.BadRequestException("user not created");
         }
         await (0, email_event_1.sendConfirmEmail)({ to: email, username, otp });
-        return res.status(201).json({ message: "user created suuccess", user });
+        return res.status(201).json({
+            message: "Signup successful. A confirmation email has been sent.",
+        });
     };
     confirmEmail = async (req, res) => {
         const { otp, email } = req.body;
@@ -66,9 +68,10 @@ class AuthenticationService {
         });
         await this.UserModel_pending.deleteOne({ filter: { email } });
         const Credentials = await (0, token_1.createLoginCredentials)(user);
-        return res
-            .status(200)
-            .json({ message: "user loged in success", Credentials });
+        return res.status(200).json({
+            message: "user logged in success",
+            Credentials,
+        });
     };
     login = async (req, res) => {
         const { email, password } = req.body;
@@ -82,7 +85,7 @@ class AuthenticationService {
         const Credentials = await (0, token_1.createLoginCredentials)(user);
         return res
             .status(200)
-            .json({ message: "user loged in success", Credentials });
+            .json({ message: "user logged in success", Credentials });
     };
     forgetPassword = async (req, res) => {
         const { email } = req.body;

@@ -25,7 +25,7 @@ app.use((0, cors_1.default)(), express_1.default.json(), (0, helmet_1.default)()
 app.use("/api/auth", auth_controller_1.default);
 app.use("/api/user", user_controller_1.default);
 app.use(error_response_1.globalErrorHandler);
-app.get("/", (req, res) => res.json({ message: "Hello MotherFucker" }));
+app.get("/", (req, res) => res.json({ message: "Hello Lexy" }));
 if (process.env.NODE_ENV !== "production") {
     const port = process.env.PORT || 5000;
     app.listen(port, () => console.log(`Server running on port ${port}`));

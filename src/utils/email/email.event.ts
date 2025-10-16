@@ -13,7 +13,7 @@ username : string
 
 emailEvent.on("confirmEmail", async(data:IEmail)=>{
     try {
-    data.subject ="confirma your email"
+    data.subject ="Confirm Your Email"
 data.html = emailVerificationTemplate(data.otp,data.username)
 await sendEmail(data)
     
@@ -27,7 +27,7 @@ await sendEmail(data)
 
 emailEvent.on("forgotPassword", async(data:IEmail)=>{
     try {
-    data.subject ="forgot password"
+    data.subject ="Forgot Password"
 data.html = forgetPasswordTemplate(data.otp,data.username)
 await sendEmail(data)
     

@@ -8,10 +8,18 @@ const sendEmail = async (data) => {
         throw new error_response_1.BadRequestException("missing email content");
     }
     const transporter = (0, nodemailer_1.createTransport)({
-        service: "gmail",
-        auth: { user: process.env.EMAIL, pass: process.env.PASSWORD }
+        host: "smtp-relay.brevo.com",
+        port: 587,
+        secure: false,
+        auth: {
+            user: process.env.BREVO_SMTP_LOGIN,
+            pass: process.env.BREVO_SMTP_KEY,
+        },
     });
-    return await transporter.sendMail({ ...data, from: `"hello from lexy"  <${process.env.EMAIL}>`, });
+    return await transporter.sendMail({
+        ...data,
+        from: `"Lexy App"  <${process.env.EMAIL}>`,
+    });
 };
 exports.sendEmail = sendEmail;
 //# sourceMappingURL=send.email.js.map

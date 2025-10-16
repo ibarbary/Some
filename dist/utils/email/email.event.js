@@ -10,7 +10,7 @@ const send_email_1 = require("./send.email");
 exports.emailEvent = new events_1.default();
 exports.emailEvent.on("confirmEmail", async (data) => {
     try {
-        data.subject = "confirma your email";
+        data.subject = "Confirm Your Email";
         data.html = (0, email_tempelate_1.emailVerificationTemplate)(data.otp, data.username);
         await (0, send_email_1.sendEmail)(data);
     }
@@ -20,7 +20,7 @@ exports.emailEvent.on("confirmEmail", async (data) => {
 });
 exports.emailEvent.on("forgotPassword", async (data) => {
     try {
-        data.subject = "forgot password";
+        data.subject = "Forgot Password";
         data.html = (0, email_tempelate_1.forgetPasswordTemplate)(data.otp, data.username);
         await (0, send_email_1.sendEmail)(data);
     }

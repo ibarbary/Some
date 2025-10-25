@@ -1,16 +1,21 @@
 import type { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 import { userRepository } from "../../DB/repositories/user.repositiories";
 import { UserModel_pending } from "../../DB/model/user.pending.model";
+import { OAuth2Client } from "google-auth-library";
+import axios from "axios";
 import {
   SignupDto,
   ConfirmEmailDto,
   loginDto,
   ForgetPasswordDto,
   ResetPasswordDto,
+  OAuthDto,
 } from "./auth.dto";
 import {
   BadRequestException,
   NotFoundException,
+  UnauthorizedException,
 } from "../../utils/errors/error.response";
 import { compareText, hashtext } from "../../utils/security/hash";
 import {
@@ -20,17 +25,88 @@ import {
 import { generateOtp } from "../../utils/generateotp/generateotp";
 import { UserModel } from "../../DB/model/user.model";
 import { createLoginCredentials } from "../../utils/token/token";
+import generateUsername from "../../utils/generateUsername";
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 class AuthenticationService {
   private UserModel_pending = new userRepository(UserModel_pending);
   private _UserModel = new userRepository(UserModel);
 
   constructor() {}
 
-  signup = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response> => {
+  oauthLogin = async (req: Request, res: Response): Promise<Response> => {
+    const { provider, token, role }: OAuthDto = req.body;
+
+    let userData: {
+      email: string;
+      name: string;
+      providerId: string;
+      profileImage?: string;
+    };
+
+    if (provider === "google") {
+      const ticket = await googleClient.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID!,
+      });
+
+      const payload = ticket.getPayload();
+      if (!payload || !payload.email) {
+        throw new BadRequestException("Invalid Google token");
+      }
+
+      userData = {
+        email: payload.email,
+        name: payload.name!,
+        providerId: payload.sub,
+        profileImage: payload.picture!,
+      };
+    } else if (provider === "facebook") {
+      const fbRes = await axios.get(
+        `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${token}`
+      );
+
+      const data = fbRes.data;
+      if (!data.email) {
+        throw new BadRequestException("Invalid Facebook token");
+      }
+
+      userData = {
+        email: data.email,
+        name: data.name,
+        providerId: data.id,
+        profileImage: data.picture?.data?.url,
+      };
+    } else {
+      throw new BadRequestException("Invalid provider");
+    }
+
+    let user = await this._UserModel.findone({
+      filter: { email: userData.email },
+    });
+
+    if (!user) {
+      user = await this._UserModel.createUser({
+        data: [
+          {
+            name: userData.name,
+            username: generateUsername(userData.name, userData.email),
+            email: userData.email,
+            provider,
+            providerId: userData.providerId,
+            profileImage: userData.profileImage!,
+            role,
+          },
+        ],
+      });
+    }
+
+    const Credentials = await createLoginCredentials(user);
+    return res.status(200).json({ message: "Login success", Credentials });
+  };
+
+  signup = async (req: Request, res: Response): Promise<Response> => {
     const { name, username, email, password, role, birthdate }: SignupDto =
       req.body;
 
@@ -75,9 +151,11 @@ class AuthenticationService {
     const pending_user = await this.UserModel_pending.findone({
       filter: { email },
     });
+
     if (!pending_user) {
       throw new NotFoundException("user not found");
     }
+
     if (!compareText(otp, pending_user.confirmEmailOtp)) {
       throw new BadRequestException("otp is not valid");
     }
@@ -100,7 +178,7 @@ class AuthenticationService {
     const Credentials = await createLoginCredentials(user);
 
     return res.status(200).json({
-      message: "user logged in success",
+      message: "user logged in successfully",
       Credentials,
     });
   };
@@ -121,7 +199,7 @@ class AuthenticationService {
 
     return res
       .status(200)
-      .json({ message: "user logged in success", Credentials });
+      .json({ message: "user logged in successfully", Credentials });
   };
 
   forgetPassword = async (req: Request, res: Response): Promise<Response> => {
@@ -136,7 +214,10 @@ class AuthenticationService {
 
     await this._UserModel.updateOne({
       filter: { email },
-      update: { forgetPasswordOtp: await hashtext(String(otp)) },
+      update: {
+        forgetPasswordOtp: await hashtext(String(otp)),
+        forgetPasswordOtpExpires: new Date(Date.now() + 5 * 60 * 1000),
+      },
     });
 
     await sendForgotPasswordEmail({
@@ -145,36 +226,86 @@ class AuthenticationService {
       otp,
     });
 
-    return res.status(200).json({ message: "otp sent Success" });
+    return res.status(200).json({ message: "otp sent successfully" });
   };
 
-  ResetPassword = async (req: Request, res: Response): Promise<Response> => {
-    const { email, password, otp, confirmPassword }: ResetPasswordDto =
-      req.body;
+  verifyForgotOtp = async (req: Request, res: Response): Promise<Response> => {
+    const { email, otp } = req.body;
 
     const user = await this._UserModel.findone({ filter: { email } });
     if (!user) {
       throw new NotFoundException("user not found");
     }
 
-    if (!(await compareText(otp, user.forgetPasswordOtp))) {
-      throw new BadRequestException("otp is invalid");
+    if (!user.forgetPasswordOtp || !user.forgetPasswordOtpExpires) {
+      throw new BadRequestException("no OTP found or expired");
     }
+
+    if (new Date() > new Date(user.forgetPasswordOtpExpires)) {
+      await this._UserModel.updateOne({
+        filter: { email },
+        update: {
+          $unset: { forgetPasswordOtp: 1, forgetPasswordOtpExpires: 1 },
+        },
+      });
+      throw new BadRequestException("OTP expired");
+    }
+
+    const isMatch = await compareText(otp, user.forgetPasswordOtp);
+    if (!isMatch) {
+      throw new BadRequestException("invalid OTP");
+    }
+
+    const resetToken = jwt.sign({ email }, process.env.JWT_SECRET!, {
+      expiresIn: "5m",
+    });
+
+    return res.status(200).json({
+      message: "OTP verified successfully",
+      resetToken,
+    });
+  };
+
+  ResetPassword = async (req: Request, res: Response): Promise<Response> => {
+    const { password, confirmPassword }: ResetPasswordDto = req.body;
+
+    const resetToken = req.headers.authorization?.split(" ")[1];
+
+    if (!resetToken) {
+      throw new UnauthorizedException("Missing reset token");
+    }
+
+    let decoded: { email: string };
+
+    try {
+      decoded = jwt.verify(resetToken, process.env.JWT_SECRET!) as {
+        email: string;
+      };
+    } catch {
+      throw new UnauthorizedException("Invalid or expired reset token");
+    }
+
     if (password !== confirmPassword) {
-      throw new BadRequestException(
-        "password and confirmPassword must be same"
-      );
+      throw new BadRequestException("Passwords do not match");
+    }
+
+    const user = await this._UserModel.findone({
+      filter: { email: decoded.email },
+    });
+
+    if (!user) {
+      throw new NotFoundException("User not found");
     }
 
     await this._UserModel.updateOne({
-      filter: { email },
+      filter: { email: decoded.email },
       update: {
         password: await hashtext(password),
-        $unset: { forgetPasswordOtp: 1 },
+        $unset: { forgetPasswordOtp: 1, forgetPasswordOtpExpires: 1 },
       },
     });
 
-    return res.status(200).json({ message: "password reset Success" });
+    return res.status(200).json({ message: "Password reset successfully" });
   };
 }
 

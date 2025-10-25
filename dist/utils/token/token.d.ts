@@ -32,7 +32,7 @@ export declare const createLoginCredentials: (user: HUserDocument) => Promise<{
     accestoken: string;
     refreshtoken: string;
 }>;
-export declare const decodedtoken: ({ authorization, tokenType }: {
+export declare const decodedtoken: ({ authorization, tokenType, }: {
     authorization: string;
     tokenType?: TokenEnum;
 }) => Promise<{

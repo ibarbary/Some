@@ -17,11 +17,13 @@ const Validation = (schema) => {
                     key,
                     issues: error.issues.map((issue) => {
                         return { message: issue.message, path: issue.path };
-                    })
+                    }),
                 });
             }
             if (ValidationError.length > 0) {
-                throw new error_response_1.BadRequestException("validation error", { cause: ValidationError });
+                throw new error_response_1.BadRequestException("validation error", {
+                    cause: ValidationError,
+                });
             }
         }
         return next();
@@ -29,11 +31,19 @@ const Validation = (schema) => {
 };
 exports.Validation = Validation;
 exports.generalFields = {
-    username: zod_1.z.string({ error: "username must be string" }).min(5, { error: "username must be at least 5 characters" }),
-    name: zod_1.z.string({ error: "name must be string" }).min(3, { error: "name must be at least 3 characters" }),
+    username: zod_1.z
+        .string({ error: "username must be string" })
+        .min(5, { error: "username must be at least 5 characters" }),
+    name: zod_1.z
+        .string({ error: "name must be string" })
+        .min(3, { error: "name must be at least 3 characters" }),
     email: zod_1.z.email({ error: "email must be valid" }),
-    password: zod_1.z.string().min(8, { error: "password must be at least 8 characters" }),
-    confirmPassword: zod_1.z.string().min(8, { error: "confirmPassword must be at least 8 characters" }),
-    role: zod_1.z.enum(user_model_1.RoleEnum).default(user_model_1.RoleEnum.User)
+    password: zod_1.z
+        .string()
+        .min(8, { error: "password must be at least 8 characters" }),
+    confirmPassword: zod_1.z
+        .string()
+        .min(8, { error: "confirmPassword must be at least 8 characters" }),
+    role: zod_1.z.enum(user_model_1.RoleEnum).default(user_model_1.RoleEnum.User),
 };
 //# sourceMappingURL=validation.middelware.js.map

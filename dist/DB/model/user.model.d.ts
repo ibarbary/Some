@@ -9,15 +9,19 @@ export interface IUser {
     name: string;
     username: string;
     email: string;
-    password: string;
+    password?: string;
     createdAt: Date;
     updatedAt: Date;
-    confirmEmailOtp: string;
-    forgetPasswordOtp: string;
-    changeCredentialsTime: Date;
-    birthdate: Date;
+    confirmEmailOtp?: string;
+    forgetPasswordOtp?: string;
+    forgetPasswordOtpExpires?: Date;
+    changeCredentialsTime?: Date;
+    birthdate?: Date;
     role: RoleEnum;
     parentId?: Types.ObjectId;
+    provider?: "google" | "facebook" | "local";
+    providerId?: string;
+    profileImage?: string;
 }
 export declare const userSchema: mongoose.Schema<IUser, mongoose.Model<IUser, any, any, any, mongoose.Document<unknown, any, IUser, any, {}> & IUser & Required<{
     _id: Types.ObjectId;

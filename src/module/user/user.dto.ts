@@ -1,5 +1,3 @@
 import z from "zod"
-import { logoutSchema, SignUpForChildSchema } from "./user.validation"
+import { SignUpForChildSchema } from "./user.validation"
 export type SignupForChildDto = z.infer<typeof SignUpForChildSchema.body>
-
-export type LogoutDto = z.infer<typeof logoutSchema.body>

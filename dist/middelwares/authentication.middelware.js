@@ -8,11 +8,13 @@ const authentication = (accessRole = [], tokenType = token_1.TokenEnum.Access) =
         if (!req.headers.authorization) {
             throw new error_response_1.BadRequestException("missing token in headers");
         }
-        const { decoded, user } = await (0, token_1.decodedtoken)({ authorization: req.headers.authorization, tokenType });
+        const { decoded, user } = await (0, token_1.decodedtoken)({
+            authorization: req.headers.authorization,
+            tokenType,
+        });
         if (!accessRole.includes(user.role)) {
             throw new error_response_1.BadRequestException("user not authorized");
         }
-        // beare token
         req.user = user;
         req.decoded = decoded;
         next();

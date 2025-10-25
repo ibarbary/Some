@@ -44,12 +44,17 @@ exports.userSchema_pending = new mongoose_1.default.Schema({
     confirmEmailOtp: { type: String, min: 6 },
     forgetPasswordOtp: { type: String, min: 6 },
     birthdate: { type: Date, required: true },
-    role: { type: String, enum: Object.values(user_model_1.RoleEnum), default: user_model_1.RoleEnum.User },
+    role: {
+        type: String,
+        enum: Object.values(user_model_1.RoleEnum),
+        default: user_model_1.RoleEnum.User,
+    },
     createdAt: {
         type: Date,
         default: Date.now,
         expires: 60 * 15,
     },
 }, { timestamps: true });
-exports.UserModel_pending = mongoose_1.models.User_pending || mongoose_1.default.model("User_pending", exports.userSchema_pending);
+exports.UserModel_pending = mongoose_1.models.User_pending ||
+    mongoose_1.default.model("User_pending", exports.userSchema_pending);
 //# sourceMappingURL=user.pending.model.js.map

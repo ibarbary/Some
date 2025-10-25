@@ -43,17 +43,30 @@ var RoleEnum;
 })(RoleEnum || (exports.RoleEnum = RoleEnum = {}));
 exports.userSchema = new mongoose_1.default.Schema({
     name: { type: String, required: true },
-    username: { type: String, unique: true, required: true },
+    username: { type: String, unique: true },
     email: { type: String, unique: true, required: true },
-    password: { type: String, required: true, min: 8 },
+    password: { type: String, min: 8 },
     confirmEmailOtp: { type: String, min: 6 },
     changeCredentialsTime: Date,
     forgetPasswordOtp: { type: String, min: 6 },
-    birthdate: { type: Date, required: true },
-    role: { type: String, enum: Object.values(RoleEnum), default: RoleEnum.User },
-    parentId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "User", required: false }
+    forgetPasswordOtpExpires: { type: Date },
+    birthdate: { type: Date },
+    role: {
+        type: String,
+        enum: Object.values(RoleEnum),
+        default: RoleEnum.User,
+    },
+    parentId: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: "User",
+    },
+    provider: {
+        type: String,
+        enum: ["google", "facebook", "local"],
+        default: "local",
+    },
+    providerId: { type: String },
+    profileImage: { type: String },
 }, { timestamps: true });
-//give me user object to use for postman
-//{ "name": "John Doe", "username": "johndoe", "email": "johndoe@example.com", "password": "password123", "birthdate": "2000-01-01", "role": "User" }
 exports.UserModel = mongoose_1.models.User || mongoose_1.default.model("User", exports.userSchema);
 //# sourceMappingURL=user.model.js.map

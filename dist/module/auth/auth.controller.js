@@ -8,10 +8,12 @@ const auth_service_1 = __importDefault(require("./auth.service"));
 const validation_middelware_1 = require("../../middelwares/validation.middelware");
 const auth_validation_1 = require("./auth.validation");
 const router = (0, express_1.Router)();
-router.post('/signup', (0, validation_middelware_1.Validation)(auth_validation_1.SignUpSchema), auth_service_1.default.signup);
-router.post('/confirmEmail', (0, validation_middelware_1.Validation)(auth_validation_1.confirmEmailSchema), auth_service_1.default.confirmEmail);
-router.post('/login', (0, validation_middelware_1.Validation)(auth_validation_1.LoginSchema), auth_service_1.default.login);
-router.patch('/forget-password', (0, validation_middelware_1.Validation)(auth_validation_1.ForgetPasswordSchema), auth_service_1.default.forgetPassword);
-router.patch('/reset-password', (0, validation_middelware_1.Validation)(auth_validation_1.ResetPasswordSchema), auth_service_1.default.ResetPassword);
+router.post("/signup", (0, validation_middelware_1.Validation)(auth_validation_1.SignUpSchema), auth_service_1.default.signup);
+router.post("/oauth", (0, validation_middelware_1.Validation)(auth_validation_1.OAuthSchema), auth_service_1.default.oauthLogin);
+router.post("/confirmEmail", (0, validation_middelware_1.Validation)(auth_validation_1.confirmEmailSchema), auth_service_1.default.confirmEmail);
+router.post("/login", (0, validation_middelware_1.Validation)(auth_validation_1.LoginSchema), auth_service_1.default.login);
+router.post("/forget-password", (0, validation_middelware_1.Validation)(auth_validation_1.ForgetPasswordSchema), auth_service_1.default.forgetPassword);
+router.post("/verify-forgot-otp", (0, validation_middelware_1.Validation)(auth_validation_1.VerifyOtpSchema), auth_service_1.default.verifyForgotOtp);
+router.patch("/reset-password", (0, validation_middelware_1.Validation)(auth_validation_1.ResetPasswordSchema), auth_service_1.default.ResetPassword);
 exports.default = router;
 //# sourceMappingURL=auth.controller.js.map

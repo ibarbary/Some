@@ -72,7 +72,7 @@ export const forgetPasswordTemplate = (code: number, username: string) => `<!DOC
       <p>We received a request to reset your password for your <b>lexyApplication</b> account.</p>
       <p>Use the following verification code to reset your password:</p>
       <div class="otp-box">${code}</div>
-      <p>This code will expire in <b>10 minutes</b>. If you didn’t request a password reset, you can safely ignore this email.</p>
+      <p>This code will expire in <b>15 minutes</b>. If you didn’t request a password reset, you can safely ignore this email.</p>
       <p>Thanks,<br>The lexy Application Team</p>
     </div>
     <div class="email-footer">

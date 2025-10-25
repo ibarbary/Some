@@ -13,12 +13,12 @@ exports.SignUpForChildSchema = {
         username: validation_middelware_1.generalFields.username,
         email: validation_middelware_1.generalFields.email,
         password: validation_middelware_1.generalFields.password,
-        birthdate: zod_1.default.coerce.date()
-    })
+        birthdate: zod_1.default.coerce.date(),
+    }),
 };
 exports.logoutSchema = {
     body: zod_1.default.strictObject({
-        flag: zod_1.default.enum(token_1.LogoutEnum).default(token_1.LogoutEnum.ALL)
-    })
+        flag: zod_1.default.enum(token_1.LogoutEnum).default(token_1.LogoutEnum.ALL),
+    }),
 };
 //# sourceMappingURL=user.validation.js.map

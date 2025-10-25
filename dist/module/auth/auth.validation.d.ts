@@ -10,6 +10,17 @@ export declare const SignUpSchema: {
         birthdate: z.ZodCoercedDate<unknown>;
     }, z.core.$strict>;
 };
+export declare const OAuthSchema: {
+    body: z.ZodObject<{
+        provider: z.ZodEnum<{
+            google: "google";
+            facebook: "facebook";
+            local: "local";
+        }>;
+        token: z.ZodString;
+        role: z.ZodDefault<z.ZodEnum<typeof RoleEnum>>;
+    }, z.core.$strict>;
+};
 export declare const LoginSchema: {
     body: z.ZodObject<{
         email: z.ZodEmail;
@@ -27,10 +38,15 @@ export declare const ForgetPasswordSchema: {
         email: z.ZodEmail;
     }, z.core.$strict>;
 };
-export declare const ResetPasswordSchema: {
+export declare const VerifyOtpSchema: {
     body: z.ZodObject<{
         email: z.ZodEmail;
         otp: z.ZodString;
+    }, z.core.$strict>;
+};
+export declare const ResetPasswordSchema: {
+    body: z.ZodObject<{
+        email: z.ZodEmail;
         password: z.ZodString;
         confirmPassword: z.ZodString;
     }, z.core.$strict>;

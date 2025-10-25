@@ -9,19 +9,6 @@ export const sendEmail = async (data: Mail.Options) => {
     throw new BadRequestException("missing email content");
   }
 
-  //   const transporter: Transporter<
-  //     SMTPTransport.SentMessageInfo,
-  //     SMTPTransport.Options
-  //   > = createTransport({
-  //     host: "smtp-relay.brevo.com",
-  //     port: 587,
-  //     secure: false,
-  //     auth: {
-  //       user: process.env.BREVO_SMTP_LOGIN,
-  //       pass: process.env.BREVO_SMTP_KEY,
-  //     },
-  //   });
-
   const transporter: Transporter<
     SMTPTransport.SentMessageInfo,
     SMTPTransport.Options

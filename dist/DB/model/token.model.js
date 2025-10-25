@@ -38,7 +38,7 @@ const mongoose_1 = __importStar(require("mongoose"));
 exports.tokenSchema = new mongoose_1.default.Schema({
     jti: { type: String, required: true, unique: true },
     expiresIn: { type: Number, required: true },
-    userId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "User" }
+    userId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "User" },
 }, {
     timestamps: true,
 });

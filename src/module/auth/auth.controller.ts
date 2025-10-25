@@ -10,6 +10,9 @@ import {
   OAuthSchema,
   VerifyOtpSchema,
 } from "./auth.validation";
+import { authentication } from "../../middelwares/authentication.middelware";
+import { TokenEnum } from "../../utils/token/token";
+import { endpoints } from "./auth.authorization";
 
 const router: Router = Router();
 
@@ -41,6 +44,14 @@ router.patch(
   "/reset-password",
   Validation(ResetPasswordSchema),
   authService.ResetPassword
+);
+
+router.post("/logout", authentication(endpoints.logout), authService.Logout);
+
+router.post(
+  "/refresh-token",
+  authentication(endpoints.refreshToken, TokenEnum.Refresh),
+  authService.refreshtoken
 );
 
 export default router;

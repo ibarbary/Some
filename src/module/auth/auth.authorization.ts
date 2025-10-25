@@ -1,8 +1,6 @@
 import { RoleEnum } from "../../DB/model/user.model";
 
 export const endpoints = {
-  profile: [RoleEnum.Child, RoleEnum.Guardian, RoleEnum.User],
-  SignupForChild: [RoleEnum.Guardian],
   logout: [RoleEnum.Child, RoleEnum.Guardian, RoleEnum.User],
   refreshToken: [RoleEnum.Child, RoleEnum.Guardian, RoleEnum.User],
 };

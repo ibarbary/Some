@@ -4,12 +4,11 @@ import { endpoints } from "./user.authorization";
 import userService from "./user.service";
 import { Validation } from "../../middelwares/validation.middelware";
 import {  SignUpForChildSchema } from "./user.validation";
-import { TokenEnum } from "../../utils/token/token";
 
 const router: Router = Router();
 
 router.get(
-  "/getprofile",
+  "/getProfile",
   authentication(endpoints.profile),
   userService.getProfile
 );
@@ -19,18 +18,6 @@ router.post(
   Validation(SignUpForChildSchema),
   authentication(endpoints.SignupForChild),
   userService.signupForChild
-);
-
-router.post(
-  "/logout",
-  authentication(endpoints.logout),
-  userService.Logout
-);
-
-router.post(
-  "/refresh-token",
-  authentication(endpoints.refrehToken, TokenEnum.Refresh),
-  userService.refreshtoken
 );
 
 export default router;

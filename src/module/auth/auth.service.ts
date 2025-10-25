@@ -2,7 +2,9 @@ import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { userRepository } from "../../DB/repositories/user.repositiories";
 import { UserModel_pending } from "../../DB/model/user.pending.model";
+import { HUserDocument, UserModel } from "../../DB/model/user.model";
 import { OAuth2Client } from "google-auth-library";
+import { JwtPayload } from "jsonwebtoken";
 import axios from "axios";
 import {
   SignupDto,
@@ -23,8 +25,7 @@ import {
   sendForgotPasswordEmail,
 } from "../../utils/email/email.event";
 import { generateOtp } from "../../utils/generateotp/generateotp";
-import { UserModel } from "../../DB/model/user.model";
-import { createLoginCredentials } from "../../utils/token/token";
+import { createLoginCredentials, revokeToken } from "../../utils/token/token";
 import generateUsername from "../../utils/generateUsername";
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -306,6 +307,22 @@ class AuthenticationService {
     });
 
     return res.status(200).json({ message: "Password reset successfully" });
+  };
+
+  Logout = async (req: Request, res: Response): Promise<Response> => {
+    if (!req.decoded) {
+      throw new UnauthorizedException("No active session found");
+    }
+
+    await revokeToken(req.decoded as JwtPayload);
+
+    return res.status(200).json({ message: "Logged out successfully" });
+  };
+
+  refreshtoken = async (req: Request, res: Response): Promise<Response> => {
+    const credentials = await createLoginCredentials(req.user as HUserDocument);
+    await revokeToken(req.decoded as JwtPayload);
+    return res.status(200).json({ message: "new Credentials", credentials });
   };
 }
 

@@ -51,7 +51,6 @@ export const VerifyOtpSchema = {
 export const ResetPasswordSchema = {
   body: z
     .strictObject({
-      email: generalFields.email,
       password: generalFields.password,
       confirmPassword: generalFields.confirmPassword,
     })

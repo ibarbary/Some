@@ -56,11 +56,9 @@ class UserService {
       options: { validateBeforeSave: true },
     });
 
-    const credentials = await createLoginCredentials(user);
-
     return res
       .status(201)
-      .json({ message: "child Created Successfully", credentials });
+      .json({ message: "child Created Successfully"});
   };
 }
 

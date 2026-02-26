@@ -65,7 +65,7 @@ class AuthenticationService {
       };
     } else if (provider === "facebook") {
       const fbRes = await axios.get(
-        `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${token}`
+        `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${token}`,
       );
 
       const data = fbRes.data;
@@ -111,12 +111,16 @@ class AuthenticationService {
     const { name, username, email, password, role, birthdate }: SignupDto =
       req.body;
 
-    const checkuser = await this.UserModel_pending.findone({
+    const existingUser = await this._UserModel.findone({
       filter: { email },
     });
-    if (checkuser) {
-      throw new BadRequestException("user already exist");
+
+    if (existingUser) {
+      throw new BadRequestException("User already exists");
     }
+
+    await this.UserModel_pending.deleteOne({ filter: { email } });
+
     const otp = generateOtp();
 
     const user =

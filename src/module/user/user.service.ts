@@ -62,22 +62,6 @@ class UserService {
       .status(201)
       .json({ message: "child Created Successfully", credentials });
   };
-
-  Logout = async (req: Request, res: Response): Promise<Response> => {
-    if (!req.decoded) {
-      throw new UnauthorizedException("No active session found");
-    }
-
-    await revokeToken(req.decoded as JwtPayload);
-
-    return res.status(200).json({ message: "Logged out successfully" });
-  };
-
-  refreshtoken = async (req: Request, res: Response): Promise<Response> => {
-    const credentials = await createLoginCredentials(req.user as HUserDocument);
-    await revokeToken(req.decoded as JwtPayload);
-    return res.status(200).json({ message: "new Credentials", credentials });
-  };
 }
 
 export default new UserService();

@@ -46,7 +46,6 @@ export declare const VerifyOtpSchema: {
 };
 export declare const ResetPasswordSchema: {
     body: z.ZodObject<{
-        email: z.ZodEmail;
         password: z.ZodString;
         confirmPassword: z.ZodString;
     }, z.core.$strict>;

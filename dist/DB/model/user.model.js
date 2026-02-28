@@ -38,7 +38,7 @@ const mongoose_1 = __importStar(require("mongoose"));
 var RoleEnum;
 (function (RoleEnum) {
     RoleEnum["User"] = "User";
-    RoleEnum["Guardian"] = " Guardian";
+    RoleEnum["Guardian"] = "Guardian";
     RoleEnum["Child"] = "Child";
 })(RoleEnum || (exports.RoleEnum = RoleEnum = {}));
 exports.userSchema = new mongoose_1.default.Schema({

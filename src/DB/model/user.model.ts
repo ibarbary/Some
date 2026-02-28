@@ -2,7 +2,7 @@ import mongoose, { models, Types, HydratedDocument } from "mongoose";
 
 export enum RoleEnum {
   User = "User",
-  Guardian = " Guardian",
+  Guardian = "Guardian",
   Child = "Child",
 }
 
@@ -21,6 +21,7 @@ export interface IUser {
   birthdate?: Date;
   role: RoleEnum;
   parentId?: Types.ObjectId;
+  overall_progress?: number;
 
   provider?: "google" | "facebook" | "local";
   providerId?: string;
@@ -55,7 +56,7 @@ export const userSchema = new mongoose.Schema<IUser>(
     providerId: { type: String },
     profileImage: { type: String },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const UserModel =

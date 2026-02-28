@@ -50,7 +50,6 @@ exports.VerifyOtpSchema = {
 exports.ResetPasswordSchema = {
     body: zod_1.default
         .strictObject({
-        email: validation_middelware_1.generalFields.email,
         password: validation_middelware_1.generalFields.password,
         confirmPassword: validation_middelware_1.generalFields.confirmPassword,
     })

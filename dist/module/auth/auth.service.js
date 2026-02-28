@@ -6,13 +6,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const user_repositiories_1 = require("../../DB/repositories/user.repositiories");
 const user_pending_model_1 = require("../../DB/model/user.pending.model");
+const user_model_1 = require("../../DB/model/user.model");
 const google_auth_library_1 = require("google-auth-library");
 const axios_1 = __importDefault(require("axios"));
 const error_response_1 = require("../../utils/errors/error.response");
 const hash_1 = require("../../utils/security/hash");
 const email_event_1 = require("../../utils/email/email.event");
 const generateotp_1 = require("../../utils/generateotp/generateotp");
-const user_model_1 = require("../../DB/model/user.model");
 const token_1 = require("../../utils/token/token");
 const generateUsername_1 = __importDefault(require("../../utils/generateUsername"));
 const googleClient = new google_auth_library_1.OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -78,12 +78,13 @@ class AuthenticationService {
     };
     signup = async (req, res) => {
         const { name, username, email, password, role, birthdate } = req.body;
-        const checkuser = await this.UserModel_pending.findone({
+        const existingUser = await this._UserModel.findone({
             filter: { email },
         });
-        if (checkuser) {
-            throw new error_response_1.BadRequestException("user already exist");
+        if (existingUser) {
+            throw new error_response_1.BadRequestException("User already exists");
         }
+        await this.UserModel_pending.deleteOne({ filter: { email } });
         const otp = (0, generateotp_1.generateOtp)();
         const user = (await this.UserModel_pending.createUser({
             data: [
@@ -232,6 +233,18 @@ class AuthenticationService {
             },
         });
         return res.status(200).json({ message: "Password reset successfully" });
+    };
+    Logout = async (req, res) => {
+        if (!req.decoded) {
+            throw new error_response_1.UnauthorizedException("No active session found");
+        }
+        await (0, token_1.revokeToken)(req.decoded);
+        return res.status(200).json({ message: "Logged out successfully" });
+    };
+    refreshtoken = async (req, res) => {
+        const credentials = await (0, token_1.createLoginCredentials)(req.user);
+        await (0, token_1.revokeToken)(req.decoded);
+        return res.status(200).json({ message: "new Credentials", credentials });
     };
 }
 exports.default = new AuthenticationService();

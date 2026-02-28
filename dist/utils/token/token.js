@@ -113,7 +113,7 @@ const decodedtoken = async ({ authorization, tokenType = TokenEnum.Access, }) =>
         throw new error_response_1.UnauthorizedException("invalid token decoded");
     }
     if (await tokenmodel.findone({ filter: { jti: decoded.jti } })) {
-        throw new error_response_1.UnauthorizedException("token already used");
+        throw new error_response_1.UnauthorizedException("Token has been revoked. Please log in again");
     }
     const user = await usermodel.findone({ filter: { _id: decoded._id } });
     if (!user) {

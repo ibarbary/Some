@@ -1,7 +1,7 @@
 import mongoose, { Types, HydratedDocument } from "mongoose";
 export declare enum RoleEnum {
     User = "User",
-    Guardian = " Guardian",
+    Guardian = "Guardian",
     Child = "Child"
 }
 export interface IUser {
@@ -19,6 +19,7 @@ export interface IUser {
     birthdate?: Date;
     role: RoleEnum;
     parentId?: Types.ObjectId;
+    overall_progress?: number;
     provider?: "google" | "facebook" | "local";
     providerId?: string;
     profileImage?: string;

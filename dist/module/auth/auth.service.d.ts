@@ -10,6 +10,8 @@ declare class AuthenticationService {
     forgetPassword: (req: Request, res: Response) => Promise<Response>;
     verifyForgotOtp: (req: Request, res: Response) => Promise<Response>;
     ResetPassword: (req: Request, res: Response) => Promise<Response>;
+    Logout: (req: Request, res: Response) => Promise<Response>;
+    refreshtoken: (req: Request, res: Response) => Promise<Response>;
 }
 declare const _default: AuthenticationService;
 export default _default;

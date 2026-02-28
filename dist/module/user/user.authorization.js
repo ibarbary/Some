@@ -5,7 +5,7 @@ const user_model_1 = require("../../DB/model/user.model");
 exports.endpoints = {
     profile: [user_model_1.RoleEnum.Child, user_model_1.RoleEnum.Guardian, user_model_1.RoleEnum.User],
     SignupForChild: [user_model_1.RoleEnum.Guardian],
-    logout: [user_model_1.RoleEnum.Child, user_model_1.RoleEnum.Guardian, user_model_1.RoleEnum.User],
-    refrehToken: [user_model_1.RoleEnum.Child, user_model_1.RoleEnum.Guardian, user_model_1.RoleEnum.User],
+    delete: [user_model_1.RoleEnum.Child, user_model_1.RoleEnum.Guardian, user_model_1.RoleEnum.User],
+    update: [user_model_1.RoleEnum.Child, user_model_1.RoleEnum.Guardian, user_model_1.RoleEnum.User],
 };
 //# sourceMappingURL=user.authorization.js.map

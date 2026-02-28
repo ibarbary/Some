@@ -8,6 +8,7 @@ import cors from "cors";
 import rateLimit from "express-rate-limit";
 import authRouter from "./module/auth/auth.controller";
 import userRouter from "./module/user/user.controller";
+import childrenRouter from "./module/children/children.controller";
 import { globalErrorHandler } from "./utils/errors/error.response";
 import { connectDB } from "./DB/connection";
 
@@ -26,7 +27,8 @@ app.use(cors(), express.json(), helmet(), limiter);
 connectDB();
 
 app.use("/api/auth", authRouter);
-app.use("/api/user", userRouter);
+app.use("/api/users", userRouter);
+app.use("/api/children", childrenRouter);
 app.use(globalErrorHandler);
 
 app.get("/", (req, res) => res.json({ message: "Hello Lexy" }));

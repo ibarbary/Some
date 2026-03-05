@@ -9,12 +9,6 @@ class ActivityService {
   private _ActivityLogModel = new ActivityLogRepository(ActivityLogModel);
   private _UserModel = new userRepository(UserModel);
 
-  // ─────────────────────────────────────────────────────────────
-  // GET /activity/parent
-  // Guardian calls this to get recent activity for ALL their children.
-  // Returns latest N activities sorted by date, with the child's
-  // name attached to each entry for display in the dashboard.
-  // ─────────────────────────────────────────────────────────────
   getParentActivity = async (
     req: Request,
     res: Response,
@@ -22,10 +16,8 @@ class ActivityService {
     const { limit } = req.query as unknown as ActivityQueryDto;
     const parentId = req.user!._id;
 
-    // Build filter — parent_id is indexed so this is fast
     const filter: Record<string, any> = { parent_id: parentId };
 
-    // Single query — parent_id on every log means no need to fetch children first
     const logs = await this._ActivityLogModel.find({
       filter,
       options: {
@@ -34,7 +26,7 @@ class ActivityService {
         populate: [
           {
             path: "learner_id",
-            select: "name profileImage", // only what the dashboard needs
+            select: "name profileImage",
           },
         ],
       },
@@ -61,11 +53,6 @@ class ActivityService {
     });
   };
 
-  // ─────────────────────────────────────────────────────────────
-  // GET /activity/me
-  // Learner (User or Child) views their own activity history.
-  // Useful for the child's profile screen showing what they've done.
-  // ─────────────────────────────────────────────────────────────
   getLearnerActivity = async (
     req: Request,
     res: Response,
@@ -74,7 +61,7 @@ class ActivityService {
     const learnerId = req.user!._id;
 
     const filter: Record<string, any> = { learner_id: learnerId };
-    
+
     const logs = await this._ActivityLogModel.find({
       filter,
       options: {

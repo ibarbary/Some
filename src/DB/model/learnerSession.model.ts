@@ -12,7 +12,6 @@ export interface ILearnerSession {
   ended_at?: Date;
 
   // Cumulative active play time — built up via heartbeats
-  // NOT simply ended_at - started_at (gaps when app is backgrounded are excluded)
   duration_seconds: number;
 
   status: SessionStatus;

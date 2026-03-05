@@ -24,11 +24,6 @@ class StagesService {
     LearnerLevelProgressModel,
   );
 
-  // ─────────────────────────────────────────────────────────────
-  // GET /stages?language=en|ar
-  // Returns all stages for the chosen language + the learner's
-  // progress for each (null if they haven't started it yet).
-  // ─────────────────────────────────────────────────────────────
   getStages = async (req: Request, res: Response): Promise<Response> => {
     const { language } = req.query as GetStagesQueryDto;
     const learnerId = req.user!._id;
@@ -93,11 +88,6 @@ class StagesService {
     });
   };
 
-  // ─────────────────────────────────────────────────────────────
-  // POST /stages/:stageId/start
-  // Called the first time a learner enters a stage.
-  // If a progress record already exists, just returns it (idempotent).
-  // ─────────────────────────────────────────────────────────────
   startStage = async (req: Request, res: Response): Promise<Response> => {
     const { stageId } = req.params as StageIdParamDto;
     const learnerId = req.user!._id;
@@ -176,11 +166,6 @@ class StagesService {
     });
   };
 
-  // ─────────────────────────────────────────────────────────────
-  // GET /stages/:stageId/levels
-  // Returns all LearnerLevelProgress records for this learner in
-  // this stage. Missing level_index = not started (Flutter handles).
-  // ─────────────────────────────────────────────────────────────
   getLevelProgress = async (req: Request, res: Response): Promise<Response> => {
     const { stageId } = req.params as StageIdParamDto;
     const learnerId = req.user!._id;
@@ -208,11 +193,6 @@ class StagesService {
     });
   };
 
-  // ─────────────────────────────────────────────────────────────
-  // STATIC HELPER — called by SessionsService after a level ends.
-  // Updates LearnerStageProgress then recalculates overall_progress
-  // on the User document for the correct language.
-  // ─────────────────────────────────────────────────────────────
   static updateStageAndOverallProgress = async (
     learnerId: Types.ObjectId,
     stageId: Types.ObjectId,
@@ -281,9 +261,6 @@ class StagesService {
       },
     });
 
-    // Average accuracy = sum of best_accuracy across all played levels
-    //                    divided by number of played levels
-    // We use best_accuracy not accuracy so a replay doesn't punish their average
     const averageAccuracy =
       allLevelProgress.length > 0
         ? allLevelProgress.reduce(

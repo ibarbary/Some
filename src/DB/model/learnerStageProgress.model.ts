@@ -7,8 +7,8 @@ export interface ILearnerStageProgress {
   learner_id: Types.ObjectId;
   stage_id: Types.ObjectId;
   status: StageStatus;
-  completed_levels: number; // 0 → stage.total_levels
-  progress: number; // completed_levels / total_levels  (0.0 – 1.0)
+  completed_levels: number; 
+  progress: number; // completed_levels / total_levels
   started_at: Date;
   updated_at: Date;
 }
@@ -35,7 +35,7 @@ const learnerStageProgressSchema = new mongoose.Schema<ILearnerStageProgress>(
     started_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now },
   },
-  { timestamps: false }, // we manage updated_at manually
+  { timestamps: false },
 );
 
 // One progress record per learner per stage — no duplicates
@@ -44,7 +44,6 @@ learnerStageProgressSchema.index(
   { unique: true },
 );
 
-// Fast lookups: all stages for a learner
 learnerStageProgressSchema.index({ learner_id: 1 });
 
 export const LearnerStageProgressModel =

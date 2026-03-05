@@ -9,10 +9,10 @@ export interface ILearnerLevelProgress {
   level_index: number; // 1, 2, or 3 — matches frontend constant
   status: LevelStatus;
   attempts: number; 
-  accuracy: number; // accuracy from most recent completed attempt (0.0–1.0)
+  accuracy: number; // accuracy from most recent completed attempt
   best_accuracy: number;
-  completed_at?: Date; // first time it was completed (never overwritten)
-  updated_at: Date; // last time any attempt was recorded
+  completed_at?: Date;
+  updated_at: Date;
 }
 
 const learnerLevelProgressSchema = new mongoose.Schema<ILearnerLevelProgress>(
@@ -42,13 +42,13 @@ const learnerLevelProgressSchema = new mongoose.Schema<ILearnerLevelProgress>(
   { timestamps: false },
 );
 
-// One level progress record per learner per stage per level
+
 learnerLevelProgressSchema.index(
   { learner_id: 1, stage_id: 1, level_index: 1 },
   { unique: true },
 );
 
-// Fast lookup: all levels for a learner in a stage
+
 learnerLevelProgressSchema.index({ learner_id: 1, stage_id: 1 });
 
 export const LearnerLevelProgressModel =

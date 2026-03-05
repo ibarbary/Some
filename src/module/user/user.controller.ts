@@ -7,10 +7,7 @@ import { UpdateMeSchema } from "./user.validation";
 
 const router: Router = Router();
 
-// GET /me — learner's own profile + started stages + achievements
 router.get("/me", authentication(endpoints.profile), userService.getMe);
-
-// PATCH /me — update own profile
 router.patch(
   "/me",
   Validation(UpdateMeSchema),

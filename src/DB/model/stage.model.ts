@@ -24,7 +24,6 @@ const stageSchema = new mongoose.Schema<IStage>(
   { timestamps: false },
 );
 
-// Ensure no duplicate stage per language + order
 stageSchema.index({ language: 1, order_index: 1 }, { unique: true });
 
 export const StageModel =

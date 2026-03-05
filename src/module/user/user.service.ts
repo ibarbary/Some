@@ -52,7 +52,7 @@ class UserService {
       });
     }
 
-    // Strip sensitive fields before returning
+    // remove sensitive fields before returning
     const user = req.user!.toObject();
     delete user.password;
     delete user.confirmEmailOtp;
@@ -71,7 +71,6 @@ class UserService {
 
     if (username) {
       const taken = await this._UserModel.findone({ filter: { username } });
-      // Make sure it's not taken by someone else
       if (taken && taken._id.toString() !== req.user!._id.toString()) {
         throw new BadRequestException("Username is already taken");
       }

@@ -62,10 +62,8 @@ class ChildrenService {
       filter: { parentId: req.user!._id },
     });
 
-    // Enrich each child with their started stages per language
     const enriched = await Promise.all(
       children.map(async (child: any) => {
-        // Get all stage progress records for this child
         const stageProgressRecords = await this._LearnerStageProgressModel.find(
           {
             filter: { learner_id: child._id },
@@ -76,14 +74,12 @@ class ChildrenService {
           return { ...child.toObject(), stages: [] };
         }
 
-        // Get the actual stage details for those progress records
         const stageIds = stageProgressRecords.map((sp: any) => sp.stage_id);
         const stages = await this._StageModel.find({
           filter: { _id: { $in: stageIds } },
           options: { sort: { order_index: 1 } },
         });
 
-        // Merge stage info with progress
         const stageMap = new Map(
           stageProgressRecords.map((sp: any) => [sp.stage_id.toString(), sp]),
         );

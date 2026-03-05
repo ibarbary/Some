@@ -38,11 +38,6 @@ class SessionsService {
   );
   private _ActivityLogModel = new ActivityLogRepository(ActivityLogModel);
 
-  // ─────────────────────────────────────────────────────────────
-  // POST /sessions/start
-  // Called when user taps "Play" on a level.
-  // Creates a new active session and returns session_id to Flutter.
-  // ─────────────────────────────────────────────────────────────
   startSession = async (req: Request, res: Response): Promise<Response> => {
     const { stage_id, level_index }: StartSessionDto = req.body;
     const learnerId = req.user!._id;
@@ -106,11 +101,6 @@ class SessionsService {
     });
   };
 
-  // ─────────────────────────────────────────────────────────────
-  // POST /sessions/heartbeat
-  // Called every 30s by Flutter while the game is open.
-  // Adds elapsed time only if gap <= threshold (user was active).
-  // ─────────────────────────────────────────────────────────────
   heartbeat = async (req: Request, res: Response): Promise<Response> => {
     const { session_id }: HeartbeatDto = req.body;
     const learnerId = req.user!._id;
@@ -144,11 +134,6 @@ class SessionsService {
     return res.status(200).json({ message: "Heartbeat received" });
   };
 
-  // ─────────────────────────────────────────────────────────────
-  // POST /sessions/end
-  // Called when level finishes (completed: true) or is abandoned
-  // (completed: false). Handles all side effects in one flow.
-  // ─────────────────────────────────────────────────────────────
   endSession = async (req: Request, res: Response): Promise<Response> => {
     const { session_id, accuracy, completed }: EndSessionDto = req.body;
     const learnerId = req.user!._id;
@@ -197,7 +182,7 @@ class SessionsService {
       });
     }
 
-    // ── COMPLETED FLOW ─────────────────────────────────────────
+    // COMPLETED FLOW
 
     // 5. Fetch stage for total_levels + language
     const stage = await this._StageModel.findone({
@@ -318,19 +303,10 @@ class SessionsService {
             }
           : null,
         // next_level_unlocked:isFirstCompletion && session.level_index < stage.total_levels,
-        // user_stats: {
-        //   total_study_seconds: updatedUser?.total_study_seconds ?? 0,
-        //   current_streak_days: updatedUser?.current_streak_days ?? 0,
-        //   longest_streak_days: updatedUser?.longest_streak_days ?? 0,
-        //   overall_progress: updatedUser?.overall_progress ?? { en: 0, ar: 0 },
-        // },
       },
     });
   };
 
-  // ─────────────────────────────────────────────────────────────
-  // PRIVATE — Streak logic
-  // ─────────────────────────────────────────────────────────────
   private _updateStreak = async (learnerId: any): Promise<void> => {
     const user = await this._UserModel.findone({
       filter: { _id: learnerId },

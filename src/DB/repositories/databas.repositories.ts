@@ -9,10 +9,8 @@ import {
   UpdateQuery,
   UpdateWriteOpResult,
   MongooseUpdateQueryOptions,
-  MongooseBaseQueryOptions
-
+  MongooseBaseQueryOptions,
 } from "mongoose";
-
 
 export abstract class DatabaseRepository<TDocument> {
   // constractuor
@@ -49,7 +47,6 @@ export abstract class DatabaseRepository<TDocument> {
     return await doc.exec();
   }
 
-
   async find({
     filter,
     options,
@@ -60,30 +57,32 @@ export abstract class DatabaseRepository<TDocument> {
     select?: ProjectionType<TDocument> | null;
   }): Promise<any | HydratedDocument<TDocument> | null> {
     const doc = this.model.find(filter).select(select || "");
+
     if (options?.populate) {
       doc.populate(options.populate as PopulateOptions[]);
     }
     if (options?.lean) {
       doc.lean(options.lean);
     }
+    if (options?.sort) {
+      doc.sort(options.sort);
+    }
+    if (options?.limit) {
+      doc.limit(options.limit as number);
+    }
+
     return await doc.exec();
   }
 
-
- async deleteOne({
+  async deleteOne({
     filter,
     options,
   }: {
     filter: RootFilterQuery<TDocument>;
     options?: MongooseBaseQueryOptions<TDocument> | null;
   }): Promise<any> {
-    return await this.model.deleteOne(filter, options||undefined);
+    return await this.model.deleteOne(filter, options || undefined);
   }
-
-
-
-
-
 
   async updateOne({
     filter,
@@ -94,36 +93,40 @@ export abstract class DatabaseRepository<TDocument> {
     update: UpdateQuery<TDocument>;
     options?: MongooseUpdateQueryOptions<TDocument> | null;
   }): Promise<UpdateWriteOpResult> {
+    const { $inc: existingInc, ...rest } = update as any;
+    const mergedInc = { __v: 1, ...(existingInc || {}) };
     return await this.model.updateOne(
       filter,
-      { ...update, $inc: { __v: 1 } },
-      options
+      { ...rest, $inc: mergedInc },
+      options,
     );
   }
-
-
-
-  
 
   async findOneAndUpdate({
     filter,
     update,
-    options = {new: true},
+    options = { new: true },
   }: {
     filter: RootFilterQuery<TDocument>;
     update: UpdateQuery<TDocument>;
     options?: QueryOptions<TDocument> | null;
-  }): Promise<any | HydratedDocument<TDocument>|null> {
+  }): Promise<any | HydratedDocument<TDocument> | null> {
+    const { $inc: existingInc, ...rest } = update as any;
+    const mergedInc = { __v: 1, ...(existingInc || {}) };
     return await this.model.findOneAndUpdate(
       filter,
-      { ...update, $inc: { __v: 1 } },
-      options 
+      { ...rest, $inc: mergedInc },
+      options,
     );
   }
 
-
-
- 
-
+  async countDocuments({
+    filter,
+    options,
+  }: {
+    filter?: RootFilterQuery<TDocument>;
+    options?: MongooseBaseQueryOptions<TDocument> | null;
+  }): Promise<number> {
+    return await this.model.countDocuments(filter || {}, options || undefined);
+  }
 }
-

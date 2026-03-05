@@ -1,15 +1,24 @@
 import type { Request, Response } from "express";
 import { CreateChildDto, UpdateChildDto } from "./children.dto";
 import { userRepository } from "../../DB/repositories/user.repositiories";
+import { StageRepository } from "../../DB/repositories/stage.repository";
+import { LearnerStageProgressRepository } from "../../DB/repositories/learnerStageProgress.repository";
+import { StageModel } from "../../DB/model/stage.model";
+import { LearnerStageProgressModel } from "../../DB/model/learnerStageProgress.model";
 import { RoleEnum, UserModel, HUserDocument } from "../../DB/model/user.model";
 import {
   BadRequestException,
   NotFoundException,
 } from "../../utils/errors/error.response";
+import { hashtext } from "../../utils/security/hash";
 import { Types } from "mongoose";
 
 class ChildrenService {
   private _UserModel = new userRepository(UserModel);
+  private _StageModel = new StageRepository(StageModel);
+  private _LearnerStageProgressModel = new LearnerStageProgressRepository(
+    LearnerStageProgressModel,
+  );
 
   createChild = async (req: Request, res: Response): Promise<Response> => {
     const { name, username, email, password, birthdate }: CreateChildDto =
@@ -27,13 +36,16 @@ class ChildrenService {
       throw new BadRequestException("Username is already taken");
     }
 
+    const passwordHash = await hashtext(password);
+    console.log(passwordHash);
+
     await this._UserModel.createUser({
       data: [
         {
           name,
           username,
           email,
-          password,
+          password: passwordHash,
           ...(birthdate && { birthdate }),
           role: RoleEnum.Child,
           parentId: req.user!._id,
@@ -50,11 +62,53 @@ class ChildrenService {
       filter: { parentId: req.user!._id },
     });
 
-    console.log("Got children");
+    // Enrich each child with their started stages per language
+    const enriched = await Promise.all(
+      children.map(async (child: any) => {
+        // Get all stage progress records for this child
+        const stageProgressRecords = await this._LearnerStageProgressModel.find(
+          {
+            filter: { learner_id: child._id },
+          },
+        );
+
+        if (!stageProgressRecords.length) {
+          return { ...child.toObject(), stages: [] };
+        }
+
+        // Get the actual stage details for those progress records
+        const stageIds = stageProgressRecords.map((sp: any) => sp.stage_id);
+        const stages = await this._StageModel.find({
+          filter: { _id: { $in: stageIds } },
+          options: { sort: { order_index: 1 } },
+        });
+
+        // Merge stage info with progress
+        const stageMap = new Map(
+          stageProgressRecords.map((sp: any) => [sp.stage_id.toString(), sp]),
+        );
+
+        const stagesWithProgress = stages.map((stage: any) => {
+          const progress: any = stageMap.get(stage._id.toString());
+          return {
+            _id: stage._id,
+            name: stage.name,
+            language: stage.language,
+            order_index: stage.order_index,
+            total_levels: stage.total_levels,
+            status: progress?.status,
+            completed_levels: progress?.completed_levels,
+            progress: progress?.progress,
+          };
+        });
+
+        return { ...child.toObject(), stages: stagesWithProgress };
+      }),
+    );
 
     return res.status(200).json({
       message: "Children fetched successfully",
-      children,
+      children: enriched,
     });
   };
 
@@ -71,22 +125,29 @@ class ChildrenService {
   };
 
   updateChild = async (req: Request, res: Response): Promise<Response> => {
-    const { name, username, birthdate }: UpdateChildDto = req.body;
+    const { name, username, birthdate, profileImage }: UpdateChildDto =
+      req.body;
 
     await this._verifyChildOwnership(req.params.childId!, req.user!._id);
 
     if (username) {
-      const taken = await this._UserModel.findone({
-        filter: { username },
-      });
-      if (taken) {
+      const taken = await this._UserModel.findone({ filter: { username } });
+
+      if (taken && taken._id.toString() !== req.params.childId) {
         throw new BadRequestException("Username is already taken");
       }
     }
 
     const updated = await this._UserModel.findOneAndUpdate({
       filter: { _id: req.params.childId },
-      update: { name, username, birthdate },
+      update: {
+        $set: {
+          ...(name && { name }),
+          ...(username && { username }),
+          ...(birthdate && { birthdate }),
+          ...(profileImage && { profileImage }),
+        },
+      },
       options: { new: true },
     });
 

@@ -30,16 +30,29 @@ class DatabaseRepository {
         if (options?.lean) {
             doc.lean(options.lean);
         }
+        if (options?.sort) {
+            doc.sort(options.sort);
+        }
+        if (options?.limit) {
+            doc.limit(options.limit);
+        }
         return await doc.exec();
     }
     async deleteOne({ filter, options, }) {
         return await this.model.deleteOne(filter, options || undefined);
     }
     async updateOne({ filter, update, options, }) {
-        return await this.model.updateOne(filter, { ...update, $inc: { __v: 1 } }, options);
+        const { $inc: existingInc, ...rest } = update;
+        const mergedInc = { __v: 1, ...(existingInc || {}) };
+        return await this.model.updateOne(filter, { ...rest, $inc: mergedInc }, options);
     }
     async findOneAndUpdate({ filter, update, options = { new: true }, }) {
-        return await this.model.findOneAndUpdate(filter, { ...update, $inc: { __v: 1 } }, options);
+        const { $inc: existingInc, ...rest } = update;
+        const mergedInc = { __v: 1, ...(existingInc || {}) };
+        return await this.model.findOneAndUpdate(filter, { ...rest, $inc: mergedInc }, options);
+    }
+    async countDocuments({ filter, options, }) {
+        return await this.model.countDocuments(filter || {}, options || undefined);
     }
 }
 exports.DatabaseRepository = DatabaseRepository;

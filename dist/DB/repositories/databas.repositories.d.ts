@@ -30,5 +30,9 @@ export declare abstract class DatabaseRepository<TDocument> {
         update: UpdateQuery<TDocument>;
         options?: QueryOptions<TDocument> | null;
     }): Promise<any | HydratedDocument<TDocument> | null>;
+    countDocuments({ filter, options, }: {
+        filter?: RootFilterQuery<TDocument>;
+        options?: MongooseBaseQueryOptions<TDocument> | null;
+    }): Promise<number>;
 }
 //# sourceMappingURL=databas.repositories.d.ts.map

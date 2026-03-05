@@ -13,10 +13,13 @@ const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const auth_controller_1 = __importDefault(require("./module/auth/auth.controller"));
 const user_controller_1 = __importDefault(require("./module/user/user.controller"));
 const children_controller_1 = __importDefault(require("./module/children/children.controller"));
+const stages_controller_1 = __importDefault(require("./module/stages/stages.controller"));
+const activity_controller_1 = __importDefault(require("./module/activity/activity.controller"));
+const sessions_controller_1 = __importDefault(require("./module/sessions/sessions.controller"));
 const error_response_1 = require("./utils/errors/error.response");
 const connection_1 = require("./DB/connection");
 const app = (0, express_1.default)();
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
     max: 100,
@@ -27,8 +30,11 @@ app.use((0, cors_1.default)(), express_1.default.json(), (0, helmet_1.default)()
 app.use("/api/auth", auth_controller_1.default);
 app.use("/api/users", user_controller_1.default);
 app.use("/api/children", children_controller_1.default);
+app.use("/api/stages", stages_controller_1.default);
+app.use("/api/sessions", sessions_controller_1.default);
+app.use("/api/activity", activity_controller_1.default);
 app.use(error_response_1.globalErrorHandler);
-app.get("/", (req, res) => res.json({ message: "Hello Lexy" }));
+app.get("/", (req, res) => res.json({ message: "Hello Lexi" }));
 if (process.env.NODE_ENV !== "production") {
     const port = process.env.PORT || 5000;
     app.listen(port, () => console.log(`Server running on port ${port}`));

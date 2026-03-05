@@ -4,6 +4,19 @@ export declare enum RoleEnum {
     Guardian = "Guardian",
     Child = "Child"
 }
+export interface IOverallProgress {
+    en: number;
+    ar: number;
+}
+export interface IAverageAccuracy {
+    en: number;
+    ar: number;
+}
+interface IAchievement {
+    key: string;
+    name: string;
+    earned_at: Date;
+}
 export interface IUser {
     _id: Types.ObjectId;
     name: string;
@@ -19,10 +32,17 @@ export interface IUser {
     birthdate?: Date;
     role: RoleEnum;
     parentId?: Types.ObjectId;
-    overall_progress?: number;
     provider?: "google" | "facebook" | "local";
     providerId?: string;
     profileImage?: string;
+    tags: string[];
+    overall_progress: IOverallProgress;
+    average_accuracy: IAverageAccuracy;
+    achievements: IAchievement[];
+    total_study_seconds: number;
+    last_study_date?: Date;
+    current_streak_days: number;
+    longest_streak_days: number;
 }
 export declare const userSchema: mongoose.Schema<IUser, mongoose.Model<IUser, any, any, any, mongoose.Document<unknown, any, IUser, any, {}> & IUser & Required<{
     _id: Types.ObjectId;
@@ -39,4 +59,5 @@ export declare const UserModel: mongoose.Model<any, {}, {}, {}, any, any> | mong
     __v: number;
 }, any>;
 export type HUserDocument = HydratedDocument<IUser>;
+export {};
 //# sourceMappingURL=user.model.d.ts.map

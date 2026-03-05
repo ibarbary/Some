@@ -10,9 +10,9 @@ class userRepository extends databas_repositories_1.DatabaseRepository {
         this.model = model;
     }
     async createUser({ data, options, }) {
-        const [user] = await this.create({ data, options }) || [];
+        const [user] = (await this.create({ data, options })) || [];
         if (!user) {
-            throw new error_response_1.BadRequestException('user not created');
+            throw new error_response_1.BadRequestException("user not created");
         }
         return user;
     }

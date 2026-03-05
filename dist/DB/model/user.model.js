@@ -67,6 +67,26 @@ exports.userSchema = new mongoose_1.default.Schema({
     },
     providerId: { type: String },
     profileImage: { type: String },
+    tags: { type: [String], default: [] },
+    overall_progress: {
+        en: { type: Number, default: 0, min: 0, max: 1 },
+        ar: { type: Number, default: 0, min: 0, max: 1 },
+    },
+    average_accuracy: {
+        en: { type: Number, default: 0, min: 0, max: 1 },
+        ar: { type: Number, default: 0, min: 0, max: 1 },
+    },
+    achievements: [
+        {
+            key: { type: String, required: true },
+            name: { type: String, required: true },
+            earned_at: { type: Date, default: Date.now },
+        },
+    ],
+    total_study_seconds: { type: Number, default: 0 },
+    last_study_date: { type: Date },
+    current_streak_days: { type: Number, default: 0 },
+    longest_streak_days: { type: Number, default: 0 },
 }, { timestamps: true });
 exports.UserModel = mongoose_1.models.User || mongoose_1.default.model("User", exports.userSchema);
 //# sourceMappingURL=user.model.js.map

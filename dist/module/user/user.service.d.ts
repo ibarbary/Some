@@ -1,8 +1,10 @@
 import type { Request, Response } from "express";
 declare class UserService {
     private _UserModel;
-    constructor();
-    getProfile: (req: Request, res: Response) => Promise<Response>;
+    private _StageModel;
+    private _LearnerStageProgressModel;
+    getMe: (req: Request, res: Response) => Promise<Response>;
+    updateMe: (req: Request, res: Response) => Promise<Response>;
 }
 declare const _default: UserService;
 export default _default;

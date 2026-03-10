@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// ── POST /sessions/start ──────────────────────────────────────
 export const StartSessionSchema = {
   body: z.strictObject({
     stage_id: z
@@ -13,7 +12,6 @@ export const StartSessionSchema = {
   }),
 };
 
-// ── POST /sessions/heartbeat ──────────────────────────────────
 export const HeartbeatSchema = {
   body: z.strictObject({
     session_id: z
@@ -25,7 +23,6 @@ export const HeartbeatSchema = {
   }),
 };
 
-// ── POST /sessions/end ────────────────────────────────────────
 export const EndSessionSchema = {
   body: z.strictObject({
     session_id: z

@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// Shared optional limit + language query params
 export const ActivityQuerySchema = {
   query: z.object({
     limit: z

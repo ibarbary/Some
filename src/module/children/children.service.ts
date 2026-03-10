@@ -114,9 +114,42 @@ class ChildrenService {
       req.user!._id,
     );
 
+    // Fetch stages for this child
+    const stageProgressRecords = await this._LearnerStageProgressModel.find({
+      filter: { learner_id: child._id },
+    });
+
+    let stages: any[] = [];
+
+    if (stageProgressRecords.length) {
+      const stageIds = stageProgressRecords.map((sp: any) => sp.stage_id);
+      const stageDetails = await this._StageModel.find({
+        filter: { _id: { $in: stageIds } },
+        options: { sort: { order_index: 1 } },
+      });
+
+      const stageMap = new Map(
+        stageProgressRecords.map((sp: any) => [sp.stage_id.toString(), sp]),
+      );
+
+      stages = stageDetails.map((stage: any) => {
+        const progress: any = stageMap.get(stage._id.toString());
+        return {
+          _id: stage._id,
+          name: stage.name,
+          language: stage.language,
+          order_index: stage.order_index,
+          total_levels: stage.total_levels,
+          status: progress?.status,
+          completed_levels: progress?.completed_levels,
+          progress: progress?.progress,
+        };
+      });
+    }
+
     return res.status(200).json({
       message: "Child fetched successfully",
-      child,
+      child: { ...child.toObject(), stages },
     });
   };
 
@@ -128,7 +161,6 @@ class ChildrenService {
 
     if (username) {
       const taken = await this._UserModel.findone({ filter: { username } });
-
       if (taken && taken._id.toString() !== req.params.childId) {
         throw new BadRequestException("Username is already taken");
       }
@@ -147,9 +179,42 @@ class ChildrenService {
       options: { new: true },
     });
 
+    // Fetch stages for this child
+    const stageProgressRecords = await this._LearnerStageProgressModel.find({
+      filter: { learner_id: updated._id },
+    });
+
+    let stages: any[] = [];
+
+    if (stageProgressRecords.length) {
+      const stageIds = stageProgressRecords.map((sp: any) => sp.stage_id);
+      const stageDetails = await this._StageModel.find({
+        filter: { _id: { $in: stageIds } },
+        options: { sort: { order_index: 1 } },
+      });
+
+      const stageMap = new Map(
+        stageProgressRecords.map((sp: any) => [sp.stage_id.toString(), sp]),
+      );
+
+      stages = stageDetails.map((stage: any) => {
+        const progress: any = stageMap.get(stage._id.toString());
+        return {
+          _id: stage._id,
+          name: stage.name,
+          language: stage.language,
+          order_index: stage.order_index,
+          total_levels: stage.total_levels,
+          status: progress?.status,
+          completed_levels: progress?.completed_levels,
+          progress: progress?.progress,
+        };
+      });
+    }
+
     return res.status(200).json({
       message: "Child updated successfully",
-      child: updated,
+      child: { ...updated.toObject(), stages },
     });
   };
 

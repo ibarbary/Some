@@ -89,6 +89,39 @@ class UserService {
       options: { new: true },
     });
 
+    // Fetch stages (same logic as getMe)
+    const stageProgressRecords = await this._LearnerStageProgressModel.find({
+      filter: { learner_id: updated._id },
+    });
+
+    let stages: any[] = [];
+
+    if (stageProgressRecords.length) {
+      const stageIds = stageProgressRecords.map((sp: any) => sp.stage_id);
+      const stageDetails = await this._StageModel.find({
+        filter: { _id: { $in: stageIds } },
+        options: { sort: { order_index: 1 } },
+      });
+
+      const stageMap = new Map(
+        stageProgressRecords.map((sp: any) => [sp.stage_id.toString(), sp]),
+      );
+
+      stages = stageDetails.map((stage: any) => {
+        const progress: any = stageMap.get(stage._id.toString());
+        return {
+          _id: stage._id,
+          name: stage.name,
+          language: stage.language,
+          order_index: stage.order_index,
+          total_levels: stage.total_levels,
+          status: progress?.status,
+          completed_levels: progress?.completed_levels,
+          progress: progress?.progress,
+        };
+      });
+    }
+
     const user = updated.toObject();
     delete user.password;
     delete user.confirmEmailOtp;
@@ -98,7 +131,7 @@ class UserService {
 
     return res.status(200).json({
       message: "Profile updated successfully",
-      data: user,
+      data: { ...user, stages },
     });
   };
 }

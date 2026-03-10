@@ -24,6 +24,12 @@ import { ActivityLogRepository } from "../../DB/repositories/activityLog.reposit
 // that gap is not counted toward duration (user was away).
 const HEARTBEAT_GAP_THRESHOLD_SECONDS = 60;
 
+interface IAwardedAchievement {
+  key: string;
+  name: string;
+  earned_at: Date;
+}
+
 class SessionsService {
   private _UserModel = new userRepository(UserModel);
   private _StageModel = new StageRepository(StageModel);
@@ -273,8 +279,10 @@ class SessionsService {
       req.user!.parentId, // parent_id from the authenticated user
       stage,
       session,
+      accuracy,
       updatedStageProgress,
       newAchievements,
+      isFirstCompletion,
     );
 
     // 12. Fetch updated user stats
@@ -302,7 +310,7 @@ class SessionsService {
               progress: updatedStageProgress.progress,
             }
           : null,
-        // next_level_unlocked:isFirstCompletion && session.level_index < stage.total_levels,
+        achievements: newAchievements,
       },
     });
   };
@@ -357,12 +365,12 @@ class SessionsService {
     isFirstCompletion: boolean,
     stage: any,
     session: any,
-  ): Promise<string[]> => {
+  ): Promise<IAwardedAchievement[]> => {
     const user = await this._UserModel.findone({ filter: { _id: learnerId } });
     if (!user) return [];
 
     const existingKeys = new Set(user.achievements.map((a: any) => a.key));
-    const toAward: { key: string; name: string; earned_at: Date }[] = [];
+    const toAward: IAwardedAchievement[] = [];
 
     const add = (achievement: { key: string; name: string }) => {
       if (!existingKeys.has(achievement.key)) {
@@ -371,7 +379,7 @@ class SessionsService {
       }
     };
 
-    // FIRST_STEP — first level ever completed
+    // FIRST_STEP — first level ever completed across all stages/languages
     if (isFirstCompletion) {
       const totalLevelsCompleted =
         await this._LearnerLevelProgressModel.countDocuments({
@@ -382,12 +390,12 @@ class SessionsService {
       }
     }
 
-    // PERFECT_SCORE — 100% accuracy
+    // PERFECT_SCORE — 100% accuracy on any level (can only earn once)
     if (accuracy >= 1.0) {
       add(ACHIEVEMENTS.PERFECT_SCORE);
     }
 
-    // FAST_LEARNER — completed all levels in a stage
+    // FAST_LEARNER — completed all levels in a stage for the first time
     if (isFirstCompletion) {
       const stageCompleted = await this._LearnerStageProgressModel.findone({
         filter: {
@@ -401,7 +409,7 @@ class SessionsService {
       }
     }
 
-    // STREAK_7 and STREAK_30
+    // STREAK_7 and STREAK_30 — checked after _updateStreak runs (step 8)
     const freshUser = await this._UserModel.findone({
       filter: { _id: learnerId },
       select: "current_streak_days",
@@ -414,14 +422,12 @@ class SessionsService {
       await this._UserModel.findOneAndUpdate({
         filter: { _id: learnerId },
         update: {
-          $set: {
-            achievements: [...user.achievements, ...toAward],
-          },
+          $set: { achievements: [...user.achievements, ...toAward] },
         },
       });
     }
 
-    return toAward.map((a) => a.key);
+    return toAward;
   };
 
   private _logActivity = async (
@@ -429,30 +435,35 @@ class SessionsService {
     parentId: Types.ObjectId | undefined,
     stage: any,
     session: any,
+    accuracy: number,
     stageProgress: any,
-    newAchievementKeys: string[],
+    newAchievements: IAwardedAchievement[],
+    isFirstCompletion: boolean,
   ): Promise<void> => {
     const logs: any[] = [];
 
-    // Level completed log
+    // 1. Level completed or replayed
     logs.push({
       learner_id: learnerId,
-      parent_id: parentId,
+      parent_id: parentId ?? null,
       type: "level_completed",
-      description: `Completed Level ${session.level_index} of ${stage.name}`,
+      description: isFirstCompletion
+        ? `Completed Level ${session.level_index} of ${stage.name}`
+        : `Replayed Level ${session.level_index} of ${stage.name}`,
       metadata: {
         stage_name: stage.name,
         level_index: session.level_index,
-        accuracy: session.accuracy,
+        accuracy,
+        is_first_completion: isFirstCompletion,
       },
       created_at: new Date(),
     });
 
-    // Stage completed log (only if just finished)
-    if (stageProgress?.status === "completed") {
+    // 2. Stage completed — only if just finished for the first time
+    if (isFirstCompletion && stageProgress?.status === "completed") {
       logs.push({
         learner_id: learnerId,
-        parent_id: parentId,
+        parent_id: parentId ?? null,
         type: "stage_completed",
         description: `Completed the ${stage.name} stage`,
         metadata: { stage_name: stage.name },
@@ -460,21 +471,16 @@ class SessionsService {
       });
     }
 
-    // Achievement logs
-    for (const key of newAchievementKeys) {
-      const achievement = Object.values(ACHIEVEMENTS).find(
-        (a) => a.key === key,
-      );
-      if (achievement) {
-        logs.push({
-          learner_id: learnerId,
-          parent_id: parentId,
-          type: "achievement_earned",
-          description: `Earned the "${achievement.name}" achievement`,
-          metadata: { achievement_key: key },
-          created_at: new Date(),
-        });
-      }
+    // 3. One log per achievement earned this session
+    for (const achievement of newAchievements) {
+      logs.push({
+        learner_id: learnerId,
+        parent_id: parentId ?? null,
+        type: "achievement_earned",
+        description: `Earned the "${achievement.name}" achievement`,
+        metadata: { achievement_key: achievement.key },
+        created_at: new Date(),
+      });
     }
 
     await this._ActivityLogModel.create({ data: logs });

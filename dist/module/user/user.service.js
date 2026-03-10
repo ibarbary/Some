@@ -41,7 +41,7 @@ class UserService {
                 };
             });
         }
-        // Strip sensitive fields before returning
+        // remove sensitive fields before returning
         const user = req.user.toObject();
         delete user.password;
         delete user.confirmEmailOtp;
@@ -57,7 +57,6 @@ class UserService {
         const { name, username, birthdate, profileImage } = req.body;
         if (username) {
             const taken = await this._UserModel.findone({ filter: { username } });
-            // Make sure it's not taken by someone else
             if (taken && taken._id.toString() !== req.user._id.toString()) {
                 throw new error_response_1.BadRequestException("Username is already taken");
             }
@@ -74,6 +73,32 @@ class UserService {
             },
             options: { new: true },
         });
+        // Fetch stages (same logic as getMe)
+        const stageProgressRecords = await this._LearnerStageProgressModel.find({
+            filter: { learner_id: updated._id },
+        });
+        let stages = [];
+        if (stageProgressRecords.length) {
+            const stageIds = stageProgressRecords.map((sp) => sp.stage_id);
+            const stageDetails = await this._StageModel.find({
+                filter: { _id: { $in: stageIds } },
+                options: { sort: { order_index: 1 } },
+            });
+            const stageMap = new Map(stageProgressRecords.map((sp) => [sp.stage_id.toString(), sp]));
+            stages = stageDetails.map((stage) => {
+                const progress = stageMap.get(stage._id.toString());
+                return {
+                    _id: stage._id,
+                    name: stage.name,
+                    language: stage.language,
+                    order_index: stage.order_index,
+                    total_levels: stage.total_levels,
+                    status: progress?.status,
+                    completed_levels: progress?.completed_levels,
+                    progress: progress?.progress,
+                };
+            });
+        }
         const user = updated.toObject();
         delete user.password;
         delete user.confirmEmailOtp;
@@ -82,7 +107,7 @@ class UserService {
         delete user.changeCredentialsTime;
         return res.status(200).json({
             message: "Profile updated successfully",
-            data: user,
+            data: { ...user, stages },
         });
     };
 }
